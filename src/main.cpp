@@ -12,16 +12,15 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
 {
     std::shared_ptr<const RopeNode> left;
     std::shared_ptr<const RopeNode> right;
-
-    std::vector<char> buffer;
     size_t size;
+    std::shared_ptr<std::vector<char>> buffer;
 
-    RopeNode() : left(nullptr), right(nullptr), size(0)
+    RopeNode() : left(nullptr), right(nullptr), size(0), buffer(nullptr)
     {
     }
 
     RopeNode(std::shared_ptr<const RopeNode> left_node, std::shared_ptr<const RopeNode> right_node) :
-        left(left_node), right(right_node), size(0)
+        left(left_node), right(right_node), size(0), buffer(nullptr)
     {
         if (left_node != nullptr) {
             size = left_node->size;
@@ -36,18 +35,18 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     {
         const auto sz = value.size();
         size = sz;
-        buffer.resize(sz);
-        std::copy(std::begin(value), std::end(value), buffer.data());
+        buffer = std::make_shared<std::vector<char>>(sz);
+        std::copy(std::begin(value), std::end(value), buffer->data());
     }
 
     char at(size_t index) const
     {
         if (is_leaf()) {
-            if (index >= buffer.size()) {
+            if (index >= size) {
                 // TODO: throw
                 return '\0';
             }
-            return buffer[index];
+            return (*buffer)[index];
         }
 
         if (index < weight()) {
@@ -60,10 +59,11 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> split(size_t index) const
     {
         if (is_leaf()) {
-            auto begin_first = std::begin(buffer);
+            // TODO: check out of bounds
+            auto begin_first = std::begin(*buffer);
             auto end_first = begin_first + index;
             auto begin_second = end_first;
-            auto end_second = std::end(buffer);
+            auto end_second = std::end(*buffer);
 
             return {std::make_shared<const RopeNode>(std::string_view{begin_first, end_first}),
                     std::make_shared<const RopeNode>(std::string_view{begin_second, end_second})};
@@ -85,7 +85,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     size_t weight() const
     {
         if (is_leaf()) {
-            return buffer.size();
+            return size;
         }
 
         return left->size;
@@ -165,13 +165,22 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
         auto nodes = collect_leaves();
 
         std::for_each(std::begin(nodes), std::end(nodes), [&stream](const auto node) {
-            if (node->buffer.size() > 0) {
-                std::string tmp{std::begin(node->buffer), std::end(node->buffer)};
+            if (node->size > 0 && node->buffer != nullptr) {
+                std::string tmp{std::begin(*node->buffer), std::end(*node->buffer)};
                 stream << tmp;
             }
         });
 
         return stream.str();
+    }
+
+    friend void swap(RopeNode& first, RopeNode& second) noexcept
+    {
+        using std::swap;
+        swap(first.left, second.left);
+        swap(first.right, second.right);
+        swap(first.size, second.size);
+        swap(first.buffer, second.buffer);
     }
 };
 
@@ -182,12 +191,11 @@ struct Rope
     {
     }
 
+    Rope(const Rope&) = default;
+    Rope& operator=(const Rope&) = default;
+
     ~Rope()
     {
-        if (root.use_count() > 1) {
-            return;
-        }
-
         std::stack<std::shared_ptr<const RopeNode>> queue;
         std::stack<std::shared_ptr<const RopeNode>> path;
 
@@ -201,9 +209,20 @@ struct Rope
                 path.pop();
                 queue.pop();
 
+                // 2 = on the tree and on the r variable only
+                if (r.use_count() > 2) {
+                    continue;
+                }
+
                 auto node = const_cast<RopeNode*>(r.get());
-                node->left.reset();
-                node->right.reset();
+
+                if (node->left.use_count() <= 1) {
+                    node->left.reset();
+                }
+
+                if (node->right.use_count() <= 1) {
+                    node->right.reset();
+                }
 
                 r.reset();
             } else {
@@ -222,16 +241,14 @@ struct Rope
         root = nullptr;
     }
 
-    Rope rebalance()
+    void rebalance()
     {
-        auto old_rope = Rope{root};
-
-        if (!is_balanced()) {
-            auto leaves = root->collect_leaves();
-            root = do_merge(leaves, 0, leaves.size());
+        if (is_balanced()) {
+            return;
         }
 
-        return old_rope;
+        auto leaves = root->collect_leaves();
+        root = do_merge(leaves, 0, leaves.size());
     }
 
     bool is_balanced() const
@@ -239,59 +256,50 @@ struct Rope
         return is_balanced(root);
     }
 
-    Rope append(std::string_view content)
+    void append(std::string_view content)
     {
-        auto old_rope = Rope{root};
         root = concat(root, std::make_shared<const RopeNode>(content));
-
-        return old_rope;
     }
 
-    Rope prepend(std::string_view content)
+    void prepend(std::string_view content)
     {
-        auto old_rope = Rope{root};
         root = concat(std::make_shared<const RopeNode>(content), root);
-
-        return old_rope;
     }
 
-    Rope insert(size_t position, std::string_view content)
+    void insert(size_t position, std::string_view content)
     {
         if (position == 0) {
             prepend(content);
-            return Rope{root};
+
+            return;
         }
 
         auto sz = size();
 
         if (position == sz) {
             append(content);
+
+            return;
         } else if (position > sz) {
             // TODO: throw
-            return Rope{root};
+            return;
         }
 
         auto parts = split(position);
 
-        auto old_rope = Rope{root};
         root = concat(concat(parts.first, std::make_shared<const RopeNode>(content)), parts.second);
-
-        return old_rope;
     }
 
-    Rope erase(size_t position, size_t size)
+    void erase(size_t position, size_t size)
     {
         if (size == 0) {
-            return Rope{root};
+            return;
         }
 
         auto parts = split(position);
         auto to_remove_parts = split(position + size);
 
-        auto old_rope = Rope{root};
         root = concat(parts.first, to_remove_parts.second);
-
-        return old_rope;
     }
 
     std::string to_string() const
@@ -374,20 +382,20 @@ int main(int argc, char* argv[])
 {
     Rope data;
 
-    for (size_t i = 0; i < 4; ++i) {
-        data.append("-");
-    }
-
-    data.append("OK");
     data.append("Waldson");
-    data.append("END");
-    data.rebalance();
-    std::cout << data.to_string() << std::endl;
-    std::cout << data.size() << std::endl;
-    std::cout << data.at(1) << std::endl;
-    std::cout << data.substring(1, 5) << std::endl;
+    data.append("Patricio");
+    data.append("Nascimento");
+    data.append("Leandro");
 
-    std::cout << sizeof(RopeNode) << std::endl;
+    Rope data2 = data;
+    data.append("OK");
+    data.erase(2, 5);
+    data.erase(0, 5);
+    data2.append("HMMM");
+
+    std::cout << data.to_string() << std::endl;
+    std::cout << data2.size() << std::endl;
+    std::cout << data2.to_string() << std::endl;
 
     return 0;
 }
