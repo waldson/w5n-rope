@@ -4,6 +4,7 @@
 #include <memory>
 #include <numeric>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <utility>
 
@@ -15,6 +16,10 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::vector<char> buffer;
 
     RopeNode() : left(nullptr), right(nullptr)
+    {
+    }
+
+    ~RopeNode()
     {
     }
 
@@ -31,7 +36,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
 
     size_t size() const
     {
-        auto leaves = collect_leaves(this);
+        auto leaves = collect_leaves();
 
         return std::accumulate(
             std::begin(leaves), std::end(leaves), size_t{0}, [](size_t size, std::shared_ptr<const RopeNode> node) {
@@ -46,7 +51,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
         }
 
         if (left != nullptr) {
-            auto leaves = collect_leaves(&*left);
+            auto leaves = collect_leaves();
 
             return std::accumulate(
                 std::begin(leaves), std::end(leaves), size_t{0}, [](size_t size, std::shared_ptr<const RopeNode> node) {
@@ -59,45 +64,65 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
 
     size_t depth() const
     {
-        return do_depth(this);
-    }
+        std::stack<const RopeNode*> queue;
+        std::stack<const RopeNode*> path;
 
-    size_t do_depth(const RopeNode* node) const
-    {
-        if (node == nullptr || node->is_leaf()) {
-            return 0;
+        size_t depth = 0;
+        queue.emplace(this);
+
+        while (!queue.empty()) {
+            auto r = queue.top();
+
+            if (!path.empty() && r == path.top()) {
+                if (path.size() > depth) {
+                    depth = path.size();
+                }
+
+                path.pop();
+                queue.pop();
+            } else {
+                path.emplace(r);
+
+                if (r->left != nullptr) {
+                    queue.emplace(&*r->left);
+                }
+
+                if (r->right != nullptr) {
+                    queue.emplace(&*r->right);
+                }
+            }
         }
 
-        return 1 + std::max(do_depth(&*node->left), do_depth(&*node->right));
+        return depth;
     }
 
-    std::vector<std::shared_ptr<const RopeNode>> collect_leaves(const RopeNode* root) const
+    std::vector<std::shared_ptr<const RopeNode>> collect_leaves() const
     {
         std::vector<std::shared_ptr<const RopeNode>> children;
 
-        do_collect_leaves(shared_from_this(), children);
+        std::stack<std::shared_ptr<const RopeNode>> nodes;
+
+        nodes.push(shared_from_this());
+
+        while (nodes.size() > 0) {
+            auto node = nodes.top();
+            nodes.pop();
+
+            if (node->is_leaf()) {
+                children.push_back(node);
+                continue;
+            }
+
+            if (node->right != nullptr) {
+                nodes.push(node->right);
+            }
+
+            if (node->left != nullptr) {
+                nodes.push(node->left);
+            }
+        }
 
         return children;
-    }
-
-    void do_collect_leaves(std::shared_ptr<const RopeNode> root,
-                           std::vector<std::shared_ptr<const RopeNode>>& children) const
-    {
-        if (root == nullptr) {
-            return;
-        }
-
-        if (root->is_leaf()) {
-            children.push_back(root);
-        }
-
-        if (root->left) {
-            do_collect_leaves(root->left, children);
-        }
-
-        if (root->right) {
-            do_collect_leaves(root->right, children);
-        }
     }
 
     bool is_leaf() const
@@ -108,7 +133,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::string to_string() const
     {
         std::stringstream stream;
-        auto nodes = collect_leaves(this);
+        auto nodes = collect_leaves();
 
         std::for_each(std::begin(nodes), std::end(nodes), [&stream](const auto node) {
             if (node->buffer.size() > 0) {
@@ -129,14 +154,50 @@ struct Rope
     {
     }
 
-    std::shared_ptr<const RopeNode> rebalance(std::shared_ptr<const RopeNode> node) const
+    ~Rope()
     {
-        if (!is_balanced(node)) {
-            auto leaves = root->collect_leaves(&*root);
+        std::stack<std::shared_ptr<const RopeNode>> queue;
+        std::stack<std::shared_ptr<const RopeNode>> path;
+
+        queue.emplace(root);
+
+        while (!queue.empty()) {
+            auto r = queue.top();
+
+            if (!path.empty() && r == path.top()) {
+                // all children processed
+                path.pop();
+                queue.pop();
+
+                auto node = const_cast<RopeNode*>(r.get());
+                node->left.reset();
+                node->right.reset();
+
+                r.reset();
+            } else {
+                path.emplace(r);
+
+                if (r->right != nullptr) {
+                    queue.emplace(r->right);
+                }
+
+                if (r->left != nullptr) {
+                    queue.emplace(r->left);
+                }
+            }
+        }
+
+        root = nullptr;
+    }
+
+    std::shared_ptr<const RopeNode> rebalance() const
+    {
+        if (!is_balanced(root)) {
+            auto leaves = root->collect_leaves();
             return do_merge(leaves, 0, leaves.size());
         }
 
-        return node;
+        return root;
     }
 
     bool is_balanced(std::shared_ptr<const RopeNode> node) const
@@ -168,12 +229,12 @@ struct Rope
 
     void append(std::string_view content)
     {
-        root = rebalance(concat(root, std::make_shared<const RopeNode>(content)));
+        root = concat(root, std::make_shared<const RopeNode>(content));
     }
 
     void prepend(std::string_view content)
     {
-        root = rebalance(concat(std::make_shared<const RopeNode>(content), root));
+        root = concat(std::make_shared<const RopeNode>(content), root);
     }
 
     void insert(size_t position, std::string_view content)
@@ -218,12 +279,15 @@ int main(int argc, char* argv[])
 {
     Rope data;
 
-    for (size_t i = 0; i < 32; ++i) {
+    for (size_t i = 0; i < 1350000; ++i) {
         data.append(std::to_string(i));
     }
 
-    std::cout << data.to_string() << std::endl;
+    // data.rebalance();
+    std::cout << "Before size" << std::endl;
     std::cout << data.size() << std::endl;
+    std::cout << "After size" << std::endl;
+    // std::cout << data.to_string() << std::endl;
 
     return 0;
 }
