@@ -43,7 +43,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     {
         if (is_leaf()) {
             if (index >= size) {
-                // TODO: throw
+                // TODO: throw?
                 return '\0';
             }
             return (*buffer)[index];
@@ -59,7 +59,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> split(size_t index) const
     {
         if (is_leaf()) {
-            // TODO: check out of bounds
+            // TODO: check for out of bounds
             auto begin_first = std::begin(*buffer);
             auto end_first = begin_first + index;
             auto begin_second = end_first;
@@ -128,7 +128,6 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::vector<std::shared_ptr<const RopeNode>> collect_leaves() const
     {
         std::vector<std::shared_ptr<const RopeNode>> children;
-
         std::stack<std::shared_ptr<const RopeNode>> nodes;
 
         nodes.push(shared_from_this());
@@ -172,15 +171,6 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
         });
 
         return stream.str();
-    }
-
-    friend void swap(RopeNode& first, RopeNode& second) noexcept
-    {
-        using std::swap;
-        swap(first.left, second.left);
-        swap(first.right, second.right);
-        swap(first.size, second.size);
-        swap(first.buffer, second.buffer);
     }
 };
 
@@ -266,6 +256,11 @@ struct Rope
         root = concat(std::make_shared<const RopeNode>(content), root);
     }
 
+    void clear()
+    {
+        root = std::make_shared<const RopeNode>();
+    }
+
     void insert(size_t position, std::string_view content)
     {
         if (position == 0) {
@@ -281,7 +276,7 @@ struct Rope
 
             return;
         } else if (position > sz) {
-            // TODO: throw
+            // TODO: throw?
             return;
         }
 
@@ -380,22 +375,34 @@ struct Rope
 
 int main(int argc, char* argv[])
 {
-    Rope data;
+    Rope data3;
 
-    data.append("Waldson");
-    data.append("Patricio");
-    data.append("Nascimento");
-    data.append("Leandro");
+    {
 
-    Rope data2 = data;
-    data.append("OK");
-    data.erase(2, 5);
-    data.erase(0, 5);
+        Rope data;
+        data.append("Waldson");
+        data.append("Patricio");
+        data.append("Nascimento");
+        data.append("Leandro");
+        data3 = data;
+        data.clear();
+    }
+
+    Rope data2 = data3;
+    data3.append("OK");
+    data3.erase(2, 5);
+    data3.erase(0, 5);
     data2.append("HMMM");
 
-    std::cout << data.to_string() << std::endl;
+    std::cout << data3.to_string() << std::endl;
     std::cout << data2.size() << std::endl;
     std::cout << data2.to_string() << std::endl;
+    data3.insert(8, "OITO");
+    std::cout << data3.to_string() << std::endl;
+
+    std::cout << sizeof(std::shared_ptr<const RopeNode>) << std::endl;
+    std::cout << sizeof(const RopeNode) << std::endl;
+    std::cout << sizeof(const Rope) << std::endl;
 
     return 0;
 }
