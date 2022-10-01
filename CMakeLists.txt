@@ -1,7 +1,31 @@
-cmake_minimum_required(VERSION 3.18)
-project(rope-cpp)
+cmake_minimum_required(VERSION 3.19)
+project(rope-cpp LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories(include/)
-set(CMAKE_CXX_STANDARD 20)
+
+option(BUILD_TESTS "Build the tests" ON)
+option(UTF8_SUPPORT "Add utf-8 support with uni-algo" ON)
+
+include(FetchContent)
+
+if(UTF8_SUPPORT)
+    FetchContent_Declare(uni-algo
+    GIT_REPOSITORY https://github.com/uni-algo/uni-algo.git
+    GIT_TAG v0.5.0)
+    FetchContent_MakeAvailable(uni-algo)
+endif()
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 add_executable(rope-cpp src/main.cpp)
+if(UTF8_SUPPORT)
+    target_link_libraries(rope-cpp PRIVATE uni-algo::uni-algo)
+    target_compile_definitions(rope-cpp PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
+endif()
