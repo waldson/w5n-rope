@@ -1,4 +1,4 @@
-#include "Rope.hpp"
+#include "w5n/Rope.hpp"
 
 RopeNode::RopeNode() :
     left(nullptr), right(nullptr), size(0), buffer(nullptr)
