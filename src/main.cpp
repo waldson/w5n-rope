@@ -4,15 +4,11 @@
 #include <iostream>
 #include <iterator>
 #include <string>
-#include <uni_algo/ranges.h>
 
 int main(int argc, char* argv[])
 {
-    using uni::views::drop;
-    using uni::views::take;
-
     Rope data3;
-    data3.append("🙋😀😁😂😃ção");
+    data3.append("🙋😀😁😂😃👶🏽ção");
     std::cout << data3.at(0) << std::endl;
     std::cout << data3.at(1) << std::endl;
     std::cout << data3.at(2) << std::endl;
@@ -20,6 +16,9 @@ int main(int argc, char* argv[])
     std::cout << data3.at(4) << std::endl;
     std::cout << data3.at(5) << std::endl;
     std::cout << data3.at(6) << std::endl;
+    std::cout << data3.at(7) << std::endl;
+    data3.erase(5, 1);
+    std::cout << data3.to_string() << std::endl;
 
     // {
     //

@@ -24,14 +24,15 @@ FetchContent_MakeAvailable(googletest)
 # from: http://cliutils.gitlab.io/modern-cmake/chapters/testing/googletest.html
 macro(package_add_test TESTNAME)
   # create an executable in which the tests will be stored
-  add_executable(${TESTNAME} ${ARGN})
+  add_executable(${TESTNAME} ${ARGN} ../src/Rope.cpp)
   # link the Google test infrastructure, mocking library, and a default main function to
   # the test executable.  Remove g_test_main if writing your own main function.
+
   if(UTF8_SUPPORT)
-    target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main uni-algo::uni-algo)
-  else()
-    target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main)
+    target_link_libraries(${TESTNAME} PRIVATE uni-algo::uni-algo)
+    target_compile_definitions(${TESTNAME} PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
   endif()
+  target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main)
   # gtest_discover_tests replaces gtest_add_tests,
   # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
   gtest_discover_tests(
@@ -42,10 +43,6 @@ macro(package_add_test TESTNAME)
   )
   set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 
-  if(UTF8_SUPPORT)
-    target_link_libraries(${TESTNAME} PRIVATE uni-algo::uni-algo)
-    target_compile_definitions(${TESTNAME} PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
-  endif()
 endmacro()
 
 package_add_test(

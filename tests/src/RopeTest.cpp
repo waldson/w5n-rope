@@ -109,16 +109,20 @@ TEST(RopeTest, It_Erases_Correctly)
 TEST(RopeTest, It_Gets_Correct_Character)
 {
     Rope r;
-    r.append("12345");
 
 #ifdef W5N_ROPE_UTF8_SUPPORT
-    ASSERT_EQ("1", r.at(0));
-    ASSERT_EQ("2", r.at(1));
-    ASSERT_EQ("3", r.at(2));
-    ASSERT_EQ("4", r.at(3));
-    ASSERT_EQ("5", r.at(4));
-    ASSERT_EQ("", r.at(5));
+    r.append("😀😁😂😃😄😅👶🏽ç");
+    ASSERT_EQ("😀", r.at(0));
+    ASSERT_EQ("😁", r.at(1));
+    ASSERT_EQ("😂", r.at(2));
+    ASSERT_EQ("😃", r.at(3));
+    ASSERT_EQ("😄", r.at(4));
+    ASSERT_EQ("😅", r.at(5));
+    ASSERT_EQ("👶🏽", r.at(6)); // baby has 2 code points
+    ASSERT_EQ("ç", r.at(7));
+    ASSERT_EQ("", r.at(8));
 #else
+    r.append("12345");
     ASSERT_EQ('1', r.at(0));
     ASSERT_EQ('2', r.at(1));
     ASSERT_EQ('3', r.at(2));
@@ -137,12 +141,21 @@ TEST(Utf8RopeTest, It_Erases_Correctly)
     ASSERT_EQ("😀🙎😄", r.to_string());
 }
 
+TEST(Utf8RopeTest, It_Erases_Correctly_With_Grapheme)
+{
+    Rope r;
+    r.append("😀👶🏽😂🙎😄");
+    ASSERT_TRUE(r.erase(1, 2));
+    ASSERT_EQ("😀🙎😄", r.to_string());
+}
+
 TEST(Utf8RopeTest, It_Appends_Correctly)
 {
     Rope r;
     r.append("😸😹😺");
-    r.append("😀😁😂😃😄");
+    ASSERT_EQ("😸😹😺", r.to_string());
 
+    r.append("😀😁😂😃😄");
     ASSERT_EQ("😸😹😺😀😁😂😃😄", r.to_string());
 }
 
@@ -185,17 +198,27 @@ TEST(Utf8RopeTest, It_Shows_The_Correct_Size)
     Rope r;
     ASSERT_EQ(0, r.size());
 
-    r.append("😀🙏🙍😻");
-    ASSERT_EQ(16, r.size());
+    r.append("😀🙏🙍😻👶🏽"); // 4 + 4 + 4 + 8 (the baby is composed of 2 code points)
+    ASSERT_EQ(24, r.size());
 }
 
-TEST(Utf8RopeTest, It_Shows_The_Correct_Char_Count)
+TEST(Utf8RopeTest, It_Shows_The_Correct_Char_Count_With_Graphemes)
 {
     Rope r;
 
     ASSERT_EQ(0, r.size());
     r.append("😀🙏🙍😻");
     ASSERT_EQ(4, r.charCount());
+    r.append("👶🏽"); // this baby has 2 code points
+    ASSERT_EQ(5, r.charCount());
+}
+
+TEST(Utf8RopeTest, It_Gets_The_Correct_Substring_With_Grapheme)
+{
+    Rope r;
+    r.append("👶🏽😻🙍😀");
+    ASSERT_EQ("👶🏽😻", r.substring(0, 2));
+    ASSERT_EQ("🙍😀", r.substring(2, 2));
 }
 
 TEST(Utf8RopeTest, It_Splits_Correctly)

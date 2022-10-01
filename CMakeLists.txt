@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(include/)
 
 option(BUILD_TESTS "Build the tests" ON)
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
 option(UTF8_SUPPORT "Add utf-8 support with uni-algo" ON)
 
 include(FetchContent)
@@ -19,13 +20,19 @@ if(UTF8_SUPPORT)
     FetchContent_MakeAvailable(uni-algo)
 endif()
 
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
+add_library(w5n-rope STATIC src/Rope.cpp)
+
+if (BUILD_SHARED_LIBS)
+    add_library(w5n-rope-shared SHARED src/Rope.cpp)
 endif()
 
-add_executable(rope-cpp src/main.cpp)
+add_executable(rope-cpp src/main.cpp src/Rope.cpp)
 if(UTF8_SUPPORT)
     target_link_libraries(rope-cpp PRIVATE uni-algo::uni-algo)
     target_compile_definitions(rope-cpp PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
+endif()
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
