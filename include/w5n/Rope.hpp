@@ -1,21 +1,8 @@
 #pragma once
 
-#include <algorithm>
-#include <cwchar>
-#include <iostream>
 #include <memory>
-#include <numeric>
-#include <sstream>
-#include <stack>
 #include <string>
-#include <utility>
 #include <vector>
-
-#ifndef W5N_ROPE_UTF8_IGNORE
-#include <iterator>
-#include <uni_algo/break_grapheme.h>
-#include <uni_algo/ranges.h>
-#endif
 
 namespace w5n {
 
