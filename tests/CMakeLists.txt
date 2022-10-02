@@ -4,9 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(../src)
-include_directories(../include)
-
 include(FetchContent)
 include(GoogleTest)
 
@@ -17,14 +14,14 @@ FetchContent_Declare(googletest
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
   FetchContent_Populate(googletest)
-  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
-FetchContent_MakeAvailable(googletest)
+# FetchContent_MakeAvailable(googletest)
 
 # from: http://cliutils.gitlab.io/modern-cmake/chapters/testing/googletest.html
 macro(package_add_test TESTNAME)
   # create an executable in which the tests will be stored
-  add_executable(${TESTNAME} ${ARGN} ../src/Rope.cpp)
+  add_executable(${TESTNAME} ${ARGN})
   # link the Google test infrastructure, mocking library, and a default main function to
   # the test executable.  Remove g_test_main if writing your own main function.
 
@@ -32,7 +29,7 @@ macro(package_add_test TESTNAME)
     target_link_libraries(${TESTNAME} PRIVATE uni-algo::uni-algo)
     target_compile_definitions(${TESTNAME} PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
   endif()
-  target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main)
+  target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main w5n-rope::w5n-rope)
   # gtest_discover_tests replaces gtest_add_tests,
   # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
   gtest_discover_tests(
@@ -42,7 +39,7 @@ macro(package_add_test TESTNAME)
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
   )
   set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
-
+  target_include_directories(${TESTNAME} PRIVATE ../include)
 endmacro()
 
 package_add_test(
