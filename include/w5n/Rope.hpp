@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
 #include <iterator>
 #include <uni_algo/break_grapheme.h>
 #include <uni_algo/ranges.h>
@@ -24,7 +24,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
     std::shared_ptr<const RopeNode> left;
     std::shared_ptr<const RopeNode> right;
     size_t size;
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     size_t charCount;
 #endif
 
@@ -36,7 +36,7 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
 
     RopeNode(std::string_view value);
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     std::string at(size_t index) const;
 #else
     char at(size_t index) const;
@@ -87,11 +87,11 @@ struct Rope
 
     size_t size() const;
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     size_t charCount() const;
 #endif
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     const std::string at(size_t index) const;
 #else
     char at(size_t index) const;

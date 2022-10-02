@@ -25,10 +25,12 @@ macro(package_add_test TESTNAME)
   # link the Google test infrastructure, mocking library, and a default main function to
   # the test executable.  Remove g_test_main if writing your own main function.
 
-  if(UTF8_SUPPORT)
+  if(W5N_ROPE_UTF8_IGNORE)
+    target_compile_definitions(${TESTNAME} PRIVATE W5N_ROPE_UTF8_IGNORE=1)
+  else()
     target_link_libraries(${TESTNAME} PRIVATE uni-algo::uni-algo)
-    target_compile_definitions(${TESTNAME} PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
   endif()
+
   target_link_libraries(${TESTNAME} PRIVATE gtest gmock gtest_main w5n-rope::w5n-rope)
   # gtest_discover_tests replaces gtest_add_tests,
   # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it

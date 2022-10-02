@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(BUILD_TESTS "Build the tests" ON)
-option(UTF8_SUPPORT "Add utf-8 support with uni-algo" ON)
+option(W5N_ROPE_UTF8_IGNORE "Add utf-8 support with uni-algo" OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES)
     if(NOT CMAKE_BUILD_TYPE)

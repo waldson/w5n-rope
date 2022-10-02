@@ -4,7 +4,7 @@ namespace w5n {
 
 RopeNode::RopeNode() :
     left(nullptr), right(nullptr), size(0), buffer(nullptr)
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     ,
     charCount(0)
 #endif
@@ -13,21 +13,21 @@ RopeNode::RopeNode() :
 
 RopeNode::RopeNode(std::shared_ptr<const RopeNode> left_node, std::shared_ptr<const RopeNode> right_node) :
     left(left_node), right(right_node), size(0), buffer(nullptr)
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     ,
     charCount(0)
 #endif
 {
     if (left_node != nullptr) {
         size = left_node->size;
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         charCount = left_node->charCount;
 #endif
     }
 
     if (right_node != nullptr) {
         size += right_node->size;
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         charCount += right_node->charCount;
 #endif
     }
@@ -39,21 +39,21 @@ RopeNode::RopeNode(std::string_view value) : RopeNode()
     if (sz > 0) {
         size = sz;
         buffer = std::make_shared<std::string>(value.data(), value.size());
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         auto utf8View = uni::views::grapheme::utf8(value);
         charCount = std::distance(utf8View.begin(), utf8View.end());
 #endif
     }
 }
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
 std::string RopeNode::at(size_t index) const
 #else
 char RopeNode::at(size_t index) const
 #endif
 {
     if (isLeaf()) {
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         if (index >= charCount) {
             return std::string{};
         }
@@ -91,7 +91,7 @@ std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> Rope
                     std::make_shared<const RopeNode>(std::string_view{})};
         }
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         if (index > charCount) {
             index = charCount;
         }
@@ -102,7 +102,7 @@ std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> Rope
 
 #endif
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         auto utf8View = uni::views::grapheme::utf8(*buffer);
 
         auto begin_first = std::begin(*buffer);
@@ -138,14 +138,14 @@ std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> Rope
 size_t RopeNode::weight() const
 {
     if (isLeaf()) {
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
         return charCount;
 #else
         return size;
 #endif
     }
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     return left->charCount;
 #else
     return left->size;
@@ -381,14 +381,14 @@ size_t Rope::size() const
     return root->size;
 }
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
 size_t Rope::charCount() const
 {
     return root->charCount;
 }
 #endif
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
 const std::string Rope::at(size_t index) const
 #else
 char Rope::at(size_t index) const

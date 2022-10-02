@@ -110,7 +110,7 @@ TEST(RopeTest, It_Gets_Correct_Character)
 {
     w5n::Rope r;
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
     r.append("😀😁😂😃😄😅👶🏽ç");
     ASSERT_EQ("😀", r.at(0));
     ASSERT_EQ("😁", r.at(1));
@@ -132,7 +132,7 @@ TEST(RopeTest, It_Gets_Correct_Character)
 #endif
 }
 
-#ifdef W5N_ROPE_UTF8_SUPPORT
+#ifndef W5N_ROPE_UTF8_IGNORE
 TEST(Utf8RopeTest, It_Erases_Correctly)
 {
     w5n::Rope r;

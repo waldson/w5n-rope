@@ -1,4 +1,4 @@
-if(UTF8_SUPPORT)
+if(NOT W5N_ROPE_UTF8_IGNORE)
     include(FetchContent)
     FetchContent_Declare(uni-algo
         GIT_REPOSITORY https://github.com/uni-algo/uni-algo.git
@@ -7,7 +7,7 @@ if(UTF8_SUPPORT)
     FetchContent_GetProperties(uni-algo)
     if(NOT uni-algo_POPULATED)
         FetchContent_Populate(uni-algo)
-        add_subdirectory(${uni-algo_SOURCE_DIR} ${uni-algo_BINARY_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${uni-algo_SOURCE_DIR} ${uni-algo_BINARY_DIR})
     endif()
 endif()
 
@@ -15,9 +15,10 @@ add_library(${PROJECT_NAME} STATIC)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_sources(${PROJECT_NAME} PRIVATE Rope.cpp)
 
-if(UTF8_SUPPORT)
+if (W5N_ROPE_UTF8_IGNORE)
+    target_compile_definitions(w5n-rope PRIVATE W5N_ROPE_UTF8_IGNORE=1)
+else()
     target_link_libraries(w5n-rope PRIVATE uni-algo::uni-algo)
-    target_compile_definitions(w5n-rope PRIVATE W5N_ROPE_UTF8_SUPPORT=1)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -52,6 +53,5 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
               "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
         DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake")
 
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/w5n"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-        FILES_MATCHING PATTERN "*.hpp")
+install(FILES "${PROJECT_SOURCE_DIR}/include/w5n/Rope.hpp"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/w5n")
