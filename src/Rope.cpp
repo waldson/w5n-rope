@@ -1,5 +1,7 @@
 #include "w5n/Rope.hpp"
 
+namespace w5n {
+
 RopeNode::RopeNode() :
     left(nullptr), right(nullptr), size(0), buffer(nullptr)
 #ifdef W5N_ROPE_UTF8_SUPPORT
@@ -50,7 +52,7 @@ std::string RopeNode::at(size_t index) const
 char RopeNode::at(size_t index) const
 #endif
 {
-    if (is_leaf()) {
+    if (isLeaf()) {
 #ifdef W5N_ROPE_UTF8_SUPPORT
         if (index >= charCount) {
             return std::string{};
@@ -83,7 +85,7 @@ char RopeNode::at(size_t index) const
 
 std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> RopeNode::split(size_t index) const
 {
-    if (is_leaf()) {
+    if (isLeaf()) {
         if (buffer == nullptr) {
             return {std::make_shared<const RopeNode>(std::string_view{}),
                     std::make_shared<const RopeNode>(std::string_view{})};
@@ -135,7 +137,7 @@ std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> Rope
 
 size_t RopeNode::weight() const
 {
-    if (is_leaf()) {
+    if (isLeaf()) {
 #ifdef W5N_ROPE_UTF8_SUPPORT
         return charCount;
 #else
@@ -195,7 +197,7 @@ std::vector<std::shared_ptr<const RopeNode>> RopeNode::collect_leaves() const
         auto node = nodes.top();
         nodes.pop();
 
-        if (node->is_leaf()) {
+        if (node->isLeaf()) {
             if (node->buffer != nullptr) {
                 children.push_back(node);
             }
@@ -214,12 +216,12 @@ std::vector<std::shared_ptr<const RopeNode>> RopeNode::collect_leaves() const
     return children;
 }
 
-bool RopeNode::is_leaf() const
+bool RopeNode::isLeaf() const
 {
     return left == nullptr && right == nullptr;
 }
 
-std::string RopeNode::to_string() const
+std::string RopeNode::toString() const
 {
     std::stringstream stream;
     auto nodes = collect_leaves();
@@ -287,17 +289,17 @@ Rope::~Rope()
 
 void Rope::rebalance()
 {
-    if (is_balanced()) {
+    if (isBalanced()) {
         return;
     }
 
     auto leaves = root->collect_leaves();
-    root = do_merge(leaves, 0, leaves.size());
+    root = doMerge(leaves, 0, leaves.size());
 }
 
-bool Rope::is_balanced() const
+bool Rope::isBalanced() const
 {
-    return is_balanced(root);
+    return isBalanced(root);
 }
 
 void Rope::append(std::string_view content)
@@ -354,16 +356,16 @@ bool Rope::erase(size_t position, size_t size)
     return true;
 }
 
-std::string Rope::to_string() const
+std::string Rope::toString() const
 {
-    return root->to_string();
+    return root->toString();
 }
 
 std::string Rope::substring(size_t from) const
 {
     auto parts = split(from);
 
-    return parts.second->to_string();
+    return parts.second->toString();
 }
 
 std::string Rope::substring(size_t from, size_t size) const
@@ -371,7 +373,7 @@ std::string Rope::substring(size_t from, size_t size) const
     auto begin_parts = split(from);
     auto range = begin_parts.second->split(size);
 
-    return range.first->to_string();
+    return range.first->toString();
 }
 
 size_t Rope::size() const
@@ -410,7 +412,7 @@ std::shared_ptr<const RopeNode> Rope::concat(std::shared_ptr<const RopeNode> lef
     return std::make_shared<const RopeNode>(left, right);
 }
 
-bool Rope::is_balanced(std::shared_ptr<const RopeNode> node) const
+bool Rope::isBalanced(std::shared_ptr<const RopeNode> node) const
 {
     long long left_depth = node->left == nullptr ? 0 : node->left->depth();
     long long right_depth = node->right == nullptr ? 0 : node->right->depth();
@@ -418,9 +420,9 @@ bool Rope::is_balanced(std::shared_ptr<const RopeNode> node) const
     return std::abs(left_depth - right_depth) <= 2;
 }
 
-std::shared_ptr<const RopeNode> Rope::do_merge(const std::vector<std::shared_ptr<const RopeNode>>& leaves,
-                                               size_t start,
-                                               size_t end) const
+std::shared_ptr<const RopeNode> Rope::doMerge(const std::vector<std::shared_ptr<const RopeNode>>& leaves,
+                                              size_t start,
+                                              size_t end) const
 {
     auto range = end - start;
 
@@ -434,5 +436,7 @@ std::shared_ptr<const RopeNode> Rope::do_merge(const std::vector<std::shared_ptr
 
     auto mid = start + range / 2;
 
-    return concat(do_merge(leaves, start, mid), do_merge(leaves, mid, end));
+    return concat(doMerge(leaves, start, mid), doMerge(leaves, mid, end));
 }
+
+} // namespace w5n

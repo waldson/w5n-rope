@@ -4,72 +4,72 @@
 
 TEST(RopeTest, It_Appends_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("Test");
 
-    ASSERT_EQ("Test", r.to_string());
+    ASSERT_EQ("Test", r.toString());
     r.append("ing");
-    ASSERT_EQ("Testing", r.to_string());
+    ASSERT_EQ("Testing", r.toString());
 }
 
 TEST(RopeTest, It_Prepends_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.prepend("ing");
 
-    ASSERT_EQ("ing", r.to_string());
+    ASSERT_EQ("ing", r.toString());
 
     r.prepend("Test");
-    ASSERT_EQ("Testing", r.to_string());
+    ASSERT_EQ("Testing", r.toString());
 }
 
 TEST(RopeTest, It_Inserts_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     ASSERT_TRUE(r.insert(0, "Tt"));
-    ASSERT_EQ("Tt", r.to_string());
+    ASSERT_EQ("Tt", r.toString());
 
     ASSERT_TRUE(r.insert(1, "e"));
-    ASSERT_EQ("Tet", r.to_string());
+    ASSERT_EQ("Tet", r.toString());
 
     ASSERT_TRUE(r.insert(2, "s"));
-    ASSERT_EQ("Test", r.to_string());
+    ASSERT_EQ("Test", r.toString());
 }
 
 TEST(RopeTest, It_Ignores_Empty_Appends)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("");
     ASSERT_EQ(0, r.size());
-    ASSERT_EQ("", r.to_string());
+    ASSERT_EQ("", r.toString());
 }
 
 TEST(RopeTest, It_Ignores_Empty_Prepends)
 {
-    Rope r;
+    w5n::Rope r;
     r.prepend("");
     ASSERT_EQ(0, r.size());
-    ASSERT_EQ("", r.to_string());
+    ASSERT_EQ("", r.toString());
 }
 
 TEST(RopeTest, It_Ignores_Empty_Inserts)
 {
-    Rope r;
+    w5n::Rope r;
     r.insert(0, "");
     ASSERT_EQ(0, r.size());
-    ASSERT_EQ("", r.to_string());
+    ASSERT_EQ("", r.toString());
 }
 
 TEST(RopeTest, It_Do_Not_Insert_In_Invalid_Position)
 {
-    Rope r;
+    w5n::Rope r;
     ASSERT_TRUE(r.insert(0, "Test"));
     ASSERT_FALSE(r.insert(10, "Test"));
 }
 
 TEST(RopeTest, It_Shows_The_Correct_Size)
 {
-    Rope r;
+    w5n::Rope r;
 
     ASSERT_EQ(0, r.size());
     r.append("1234");
@@ -78,7 +78,7 @@ TEST(RopeTest, It_Shows_The_Correct_Size)
 
 TEST(RopeTest, It_Splits_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("12345");
     ASSERT_EQ("12", r.substring(0, 2));
     ASSERT_EQ("345", r.substring(2, 3));
@@ -86,29 +86,29 @@ TEST(RopeTest, It_Splits_Correctly)
 
 TEST(RopeTest, It_Splits_Correctly_When_Size_Is_Bigger_Than_String)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("12345");
     ASSERT_EQ("12345", r.substring(0, 100));
 }
 
 TEST(RopeTest, It_Splits_Correctly_When_Offset_Is_Bigger_Than_String)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("12345");
     ASSERT_EQ("", r.substring(30, 2));
 }
 
 TEST(RopeTest, It_Erases_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("12345");
     ASSERT_TRUE(r.erase(0, 2));
-    ASSERT_EQ("345", r.to_string());
+    ASSERT_EQ("345", r.toString());
 }
 
 TEST(RopeTest, It_Gets_Correct_Character)
 {
-    Rope r;
+    w5n::Rope r;
 
 #ifdef W5N_ROPE_UTF8_SUPPORT
     r.append("😀😁😂😃😄😅👶🏽ç");
@@ -135,67 +135,67 @@ TEST(RopeTest, It_Gets_Correct_Character)
 #ifdef W5N_ROPE_UTF8_SUPPORT
 TEST(Utf8RopeTest, It_Erases_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😀🙏😂🙎😄");
     ASSERT_TRUE(r.erase(1, 2));
-    ASSERT_EQ("😀🙎😄", r.to_string());
+    ASSERT_EQ("😀🙎😄", r.toString());
 }
 
 TEST(Utf8RopeTest, It_Erases_Correctly_With_Grapheme)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😀👶🏽😂🙎😄");
     ASSERT_TRUE(r.erase(1, 2));
-    ASSERT_EQ("😀🙎😄", r.to_string());
+    ASSERT_EQ("😀🙎😄", r.toString());
 }
 
 TEST(Utf8RopeTest, It_Appends_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😸😹😺");
-    ASSERT_EQ("😸😹😺", r.to_string());
+    ASSERT_EQ("😸😹😺", r.toString());
 
     r.append("😀😁😂😃😄");
-    ASSERT_EQ("😸😹😺😀😁😂😃😄", r.to_string());
+    ASSERT_EQ("😸😹😺😀😁😂😃😄", r.toString());
 }
 
 TEST(Utf8RopeTest, It_Prepends_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.prepend("😀😁😂😃😄");
 
-    ASSERT_EQ("😀😁😂😃😄", r.to_string());
+    ASSERT_EQ("😀😁😂😃😄", r.toString());
 
     r.prepend("😸😹😺");
-    ASSERT_EQ("😸😹😺😀😁😂😃😄", r.to_string());
+    ASSERT_EQ("😸😹😺😀😁😂😃😄", r.toString());
 }
 
 TEST(Utf8RopeTest, It_Inserts_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     ASSERT_TRUE(r.insert(0, "😀"));
-    ASSERT_EQ("😀", r.to_string());
+    ASSERT_EQ("😀", r.toString());
 
     ASSERT_TRUE(r.insert(1, "😻"));
-    ASSERT_EQ("😀😻", r.to_string());
+    ASSERT_EQ("😀😻", r.toString());
 
     ASSERT_TRUE(r.insert(2, "🙏"));
-    ASSERT_EQ("😀😻🙏", r.to_string());
+    ASSERT_EQ("😀😻🙏", r.toString());
 
     ASSERT_TRUE(r.insert(2, "🙍"));
-    ASSERT_EQ("😀😻🙍🙏", r.to_string());
+    ASSERT_EQ("😀😻🙍🙏", r.toString());
 }
 
 TEST(Utf8RopeTest, It_Do_Not_Insert_In_Invalid_Position)
 {
-    Rope r;
+    w5n::Rope r;
     ASSERT_TRUE(r.insert(0, "😀"));
     ASSERT_FALSE(r.insert(10, "😀"));
 }
 
 TEST(Utf8RopeTest, It_Shows_The_Correct_Size)
 {
-    Rope r;
+    w5n::Rope r;
     ASSERT_EQ(0, r.size());
 
     r.append("😀🙏🙍😻👶🏽"); // 4 + 4 + 4 + 8 (the baby is composed of 2 code points)
@@ -204,7 +204,7 @@ TEST(Utf8RopeTest, It_Shows_The_Correct_Size)
 
 TEST(Utf8RopeTest, It_Shows_The_Correct_Char_Count_With_Graphemes)
 {
-    Rope r;
+    w5n::Rope r;
 
     ASSERT_EQ(0, r.size());
     r.append("😀🙏🙍😻");
@@ -215,7 +215,7 @@ TEST(Utf8RopeTest, It_Shows_The_Correct_Char_Count_With_Graphemes)
 
 TEST(Utf8RopeTest, It_Gets_The_Correct_Substring_With_Grapheme)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("👶🏽😻🙍😀");
     ASSERT_EQ("👶🏽😻", r.substring(0, 2));
     ASSERT_EQ("🙍😀", r.substring(2, 2));
@@ -223,7 +223,7 @@ TEST(Utf8RopeTest, It_Gets_The_Correct_Substring_With_Grapheme)
 
 TEST(Utf8RopeTest, It_Splits_Correctly)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😀🙏🙍😻");
     ASSERT_EQ("😀🙏", r.substring(0, 2));
     ASSERT_EQ("🙍😻", r.substring(2, 3));
@@ -231,14 +231,14 @@ TEST(Utf8RopeTest, It_Splits_Correctly)
 
 TEST(Utf8RopeTest, It_Splits_Correctly_When_Size_Is_Bigger_Than_String)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😀🙏🙍😻");
     ASSERT_EQ("😀🙏🙍😻", r.substring(0, 100));
 }
 
 TEST(Utf8RopeTest, It_Splits_Correctly_When_Offset_Is_Bigger_Than_String)
 {
-    Rope r;
+    w5n::Rope r;
     r.append("😀🙏🙍😻");
     ASSERT_EQ("", r.substring(30, 2));
 }

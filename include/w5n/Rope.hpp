@@ -17,6 +17,8 @@
 #include <uni_algo/ranges.h>
 #endif
 
+namespace w5n {
+
 struct RopeNode : std::enable_shared_from_this<RopeNode>
 {
     std::shared_ptr<const RopeNode> left;
@@ -48,9 +50,9 @@ struct RopeNode : std::enable_shared_from_this<RopeNode>
 
     std::vector<std::shared_ptr<const RopeNode>> collect_leaves() const;
 
-    bool is_leaf() const;
+    bool isLeaf() const;
 
-    std::string to_string() const;
+    std::string toString() const;
 };
 
 struct Rope
@@ -65,7 +67,7 @@ struct Rope
 
     void rebalance();
 
-    bool is_balanced() const;
+    bool isBalanced() const;
 
     void append(std::string_view content);
 
@@ -77,7 +79,7 @@ struct Rope
 
     bool erase(size_t position, size_t size);
 
-    std::string to_string() const;
+    std::string toString() const;
 
     std::string substring(size_t from) const;
 
@@ -105,9 +107,11 @@ struct Rope
     std::shared_ptr<const RopeNode> concat(std::shared_ptr<const RopeNode> left,
                                            std::shared_ptr<const RopeNode> right) const;
 
-    bool is_balanced(std::shared_ptr<const RopeNode> node) const;
+    bool isBalanced(std::shared_ptr<const RopeNode> node) const;
 
-    std::shared_ptr<const RopeNode> do_merge(const std::vector<std::shared_ptr<const RopeNode>>& leaves,
-                                             size_t start,
-                                             size_t end) const;
+    std::shared_ptr<const RopeNode> doMerge(const std::vector<std::shared_ptr<const RopeNode>>& leaves,
+                                            size_t start,
+                                            size_t end) const;
 };
+
+} // namespace w5n
