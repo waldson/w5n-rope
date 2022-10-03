@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(BUILD_TESTS "Build the tests" ON)
-option(W5N_ROPE_UTF8_IGNORE "Add utf-8 support with uni-algo" OFF)
+option(W5N_ROPE_UTF8_IGNORE "Remove support for utf-8 graphemes" OFF)
 
 add_subdirectory(src)
 

@@ -6,42 +6,6 @@
 
 namespace w5n {
 
-struct RopeNode : std::enable_shared_from_this<RopeNode>
-{
-    std::shared_ptr<const RopeNode> left;
-    std::shared_ptr<const RopeNode> right;
-    size_t size;
-#ifndef W5N_ROPE_UTF8_IGNORE
-    size_t charCount;
-#endif
-
-    std::shared_ptr<std::string> buffer;
-
-    RopeNode();
-
-    RopeNode(std::shared_ptr<const RopeNode> left_node, std::shared_ptr<const RopeNode> right_node);
-
-    RopeNode(std::string_view value);
-
-#ifndef W5N_ROPE_UTF8_IGNORE
-    std::string at(size_t index) const;
-#else
-    char at(size_t index) const;
-#endif
-
-    std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> split(size_t index) const;
-
-    size_t weight() const;
-
-    size_t depth() const;
-
-    std::vector<std::shared_ptr<const RopeNode>> collect_leaves() const;
-
-    bool isLeaf() const;
-
-    std::string toString() const;
-};
-
 struct Rope
 {
   public:
@@ -85,6 +49,42 @@ struct Rope
 #endif
 
   private:
+    struct RopeNode : std::enable_shared_from_this<RopeNode>
+    {
+        std::shared_ptr<const RopeNode> left;
+        std::shared_ptr<const RopeNode> right;
+        size_t size;
+#ifndef W5N_ROPE_UTF8_IGNORE
+        size_t charCount;
+#endif
+
+        std::shared_ptr<std::string> buffer;
+
+        RopeNode();
+
+        RopeNode(std::shared_ptr<const RopeNode> left_node, std::shared_ptr<const RopeNode> right_node);
+
+        RopeNode(std::string_view value);
+
+#ifndef W5N_ROPE_UTF8_IGNORE
+        std::string at(size_t index) const;
+#else
+        char at(size_t index) const;
+#endif
+
+        std::pair<std::shared_ptr<const RopeNode>, std::shared_ptr<const RopeNode>> split(size_t index) const;
+
+        size_t weight() const;
+
+        size_t depth() const;
+
+        std::vector<std::shared_ptr<const RopeNode>> collectLeaves() const;
+
+        bool isLeaf() const;
+
+        std::string toString() const;
+    };
+
     Rope(std::shared_ptr<const RopeNode> r);
 
     std::shared_ptr<const RopeNode> root;
