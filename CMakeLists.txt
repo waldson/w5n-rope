@@ -8,10 +8,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(BUILD_TESTS "Build the tests" ON)
+option(BUILD_TESTS "Build the tests" OFF)
+option(BUILD_EXAMPLES "Build the tests" OFF)
 option(W5N_ROPE_UTF8_IGNORE "Remove support for utf-8 graphemes" OFF)
 
 add_subdirectory(src)
+
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 if(BUILD_TESTS)
   enable_testing()
