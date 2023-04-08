@@ -20,22 +20,26 @@
 namespace w5n {
 
 Rope::RopeNode::RopeNode() :
-    left(nullptr), right(nullptr), size(0), buffer(nullptr)
+    left(nullptr), right(nullptr), size(0)
 #ifndef W5N_ROPE_UTF8_IGNORE
     ,
     charCount(0)
 #endif
+    ,
+    buffer(nullptr)
 {
 }
 
 Rope::RopeNode::RopeNode(std::shared_ptr<const Rope::RopeNode> left_node,
                          std::shared_ptr<const Rope::RopeNode> right_node) :
     left(left_node),
-    right(right_node), size(0), buffer(nullptr)
+    right(right_node), size(0)
 #ifndef W5N_ROPE_UTF8_IGNORE
     ,
     charCount(0)
 #endif
+    ,
+    buffer(nullptr)
 {
     if (left_node != nullptr) {
         size = left_node->size;

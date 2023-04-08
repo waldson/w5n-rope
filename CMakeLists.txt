@@ -7,6 +7,7 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wempty-body -Werror -Werror=maybe-uninitialized -Warray-bounds -g)
 
 option(BUILD_TESTS "Build the tests" OFF)
 option(BUILD_EXAMPLES "Build the tests" OFF)

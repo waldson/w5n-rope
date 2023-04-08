@@ -57,7 +57,6 @@ struct Rope
 #ifndef W5N_ROPE_UTF8_IGNORE
         size_t charCount;
 #endif
-
         std::shared_ptr<std::string> buffer;
 
         RopeNode();
